@@ -28,6 +28,9 @@ SD_PORT_1=7860
 SD_PORT_2=7861
 COMFY_PORT=8188
 
+# Python の出力バッファリングを無効化 (ログがリアルタイムで書き込まれるようにする)
+export PYTHONUNBUFFERED=1
+
 mkdir -p "$LOG_DIR"
 
 # ------------------------------------------
