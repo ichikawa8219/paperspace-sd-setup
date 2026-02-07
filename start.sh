@@ -101,6 +101,22 @@ start_sd() {
 }
 
 # ------------------------------------------
+# ComfyUI 依存パッケージのインストール
+# ------------------------------------------
+fix_comfy_deps() {
+    if [ ! -d "$COMFY_DIR" ]; then
+        return
+    fi
+
+    # alembic が未インストールの場合のみ実行
+    if ! python -c "import alembic" 2>/dev/null; then
+        echo "[ComfyUI] 依存パッケージをインストール中..."
+        pip install -r "$COMFY_DIR/requirements.txt" -q 2>/dev/null
+        echo "[ComfyUI] インストール完了"
+    fi
+}
+
+# ------------------------------------------
 # ComfyUI 起動関数
 # ------------------------------------------
 start_comfy() {
@@ -270,6 +286,11 @@ restore_rclone
 
 # ControlNet 依存パッケージの修復
 fix_controlnet_deps
+
+# ComfyUI 依存パッケージのインストール
+if $LAUNCH_COMFY; then
+    fix_comfy_deps
+fi
 
 # 起動
 if $LAUNCH_SD1; then
