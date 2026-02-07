@@ -57,6 +57,10 @@ start_sd() {
         log_file="$LOG_DIR/sd-1.log"
     fi
 
+    # Stability AI の元リポジトリが非公開のため、フォーク版を指定
+    export STABLE_DIFFUSION_REPO="https://github.com/Kantyadoram/stable-diffusion-stability-ai.git"
+    export STABLE_DIFFUSION_COMMIT_HASH="7435a5be1050962a936a4ef624b43814ee8824a8"
+
     echo "[SD WebUI #$instance] 起動中... (port: $port)"
     cd "$SD_DIR"
     python launch.py \
