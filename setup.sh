@@ -156,6 +156,18 @@ for ext in "${extensions[@]}"; do
     fi
 done
 
+# ControlNet 拡張機能のモデルディレクトリを共有ディレクトリにリンク
+CONTROLNET_EXT_MODELS="$EXTENSIONS_DIR/sd-webui-controlnet/models"
+if [ -d "$EXTENSIONS_DIR/sd-webui-controlnet" ]; then
+    if [ -L "$CONTROLNET_EXT_MODELS" ]; then
+        echo "    sd-webui-controlnet/models -> 既にリンク済み (スキップ)"
+    else
+        rm -rf "$CONTROLNET_EXT_MODELS"
+        ln -sf "$MODELS_DIR/controlnet" "$CONTROLNET_EXT_MODELS"
+        echo "    sd-webui-controlnet/models -> $MODELS_DIR/controlnet"
+    fi
+fi
+
 # ------------------------------------------
 # 4. ComfyUI のインストール
 # ------------------------------------------
