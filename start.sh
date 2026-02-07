@@ -17,6 +17,7 @@
 #   /tmp/        → 一時領域 (セッション終了で消える)
 
 NOTEBOOKS="/notebooks"
+MODELS_DIR="$NOTEBOOKS/models"
 SD_DIR="$NOTEBOOKS/stable-diffusion-webui"
 COMFY_DIR="$NOTEBOOKS/ComfyUI"
 SD_DATA_1="$NOTEBOOKS/sd-data-1"
@@ -68,8 +69,13 @@ start_sd() {
         --port "$port" \
         --share \
         --data-dir "$data_dir" \
+        --ckpt-dir "$MODELS_DIR/checkpoints" \
+        --lora-dir "$MODELS_DIR/loras" \
+        --vae-dir "$MODELS_DIR/vae" \
+        --embeddings-dir "$MODELS_DIR/embeddings" \
         --enable-insecure-extension-access \
         --xformers \
+        --no-download-sd-model \
         > "$log_file" 2>&1 &
 
     echo "[SD WebUI #$instance] PID: $! | ログ: $log_file"
