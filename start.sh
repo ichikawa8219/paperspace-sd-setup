@@ -131,8 +131,8 @@ wait_for_links() {
                     found_links="$found_links $name"
                 fi
             fi
-            # エラー検出
-            if grep -q "Error" "$log" 2>/dev/null && [ $waited -ge 30 ]; then
+            # 致命的エラー検出 (スクリプト読み込みエラーは無視)
+            if grep -q "RuntimeError\|CUDA Setup failed\|Torch is not able to use GPU" "$log" 2>/dev/null && [ $waited -ge 30 ]; then
                 echo "  $name: 起動エラーの可能性あり -> tail -50 $log で確認"
             fi
         done
@@ -151,7 +151,7 @@ wait_for_links() {
         local all_ready=true
         for log in "$LOG_DIR"/sd-*.log; do
             [ -f "$log" ] || continue
-            if ! grep -q "gradio.live\|Running on" "$log" 2>/dev/null; then
+            if ! grep -q "gradio.live" "$log" 2>/dev/null; then
                 all_ready=false
             fi
         done
