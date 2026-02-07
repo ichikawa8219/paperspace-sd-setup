@@ -229,6 +229,14 @@ fi
 # ------------------------------------------
 echo ""
 
+# 既存の SD WebUI / ComfyUI プロセスを停止
+existing_pids=$(ps aux | grep -E "launch\.py|main\.py" | grep -v grep | awk '{print $2}')
+if [ -n "$existing_pids" ]; then
+    echo "既存プロセスを停止中..."
+    echo "$existing_pids" | xargs kill 2>/dev/null
+    sleep 2
+fi
+
 # 古いログを削除
 rm -f "$LOG_DIR"/sd-*.log "$LOG_DIR"/comfy.log
 
