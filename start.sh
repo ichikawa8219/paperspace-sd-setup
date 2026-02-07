@@ -109,13 +109,21 @@ fix_comfy_deps() {
         return
     fi
 
-    # venv が未作成の場合は作成
+    # venv が未作成の場合は作成 (システムパッケージと完全に隔離)
     if [ ! -d "$COMFY_VENV" ]; then
         echo "[ComfyUI] 仮想環境を作成中..."
-        python -m venv "$COMFY_VENV" --system-site-packages
+        python -m venv "$COMFY_VENV"
     fi
 
-    # alembic が未インストールの場合のみ実行
+    # torch が未インストール or バージョン不足の場合はインストール
+    if ! "$COMFY_VENV/bin/python" -c "import torch; assert hasattr(torch, 'uint64')" 2>/dev/null; then
+        echo "[ComfyUI] PyTorch (CUDA 12.1) をインストール中..."
+        "$COMFY_VENV/bin/pip" install torch torchvision torchaudio \
+            --index-url https://download.pytorch.org/whl/cu121 -q 2>/dev/null
+        echo "[ComfyUI] PyTorch インストール完了"
+    fi
+
+    # ComfyUI の依存パッケージをインストール
     if ! "$COMFY_VENV/bin/python" -c "import alembic" 2>/dev/null; then
         echo "[ComfyUI] 依存パッケージをインストール中..."
         "$COMFY_VENV/bin/pip" install -r "$COMFY_DIR/requirements.txt" -q 2>/dev/null

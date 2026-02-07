@@ -181,14 +181,17 @@ else
     echo "  -> インストール完了"
 fi
 
-# ComfyUI 用仮想環境の作成 (SD WebUI との依存パッケージ競合を回避)
+# ComfyUI 用仮想環境の作成 (SD WebUI との依存パッケージ競合を完全に回避)
 echo "  -> ComfyUI 用仮想環境を作成中..."
 if [ -d "$COMFY_VENV" ]; then
     echo "    既に作成済み (スキップ)"
 else
-    python -m venv "$COMFY_VENV" --system-site-packages
+    python -m venv "$COMFY_VENV"
     echo "    作成完了: $COMFY_VENV"
 fi
+echo "  -> PyTorch (CUDA 12.1) をインストール中..."
+"$COMFY_VENV/bin/pip" install torch torchvision torchaudio \
+    --index-url https://download.pytorch.org/whl/cu121 -q 2>/dev/null
 echo "  -> ComfyUI 依存パッケージをインストール中..."
 "$COMFY_VENV/bin/pip" install -r "$COMFY_DIR/requirements.txt" -q 2>/dev/null
 echo "  -> インストール完了"
