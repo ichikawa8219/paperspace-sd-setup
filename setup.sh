@@ -28,7 +28,7 @@ echo ""
 # ------------------------------------------
 # 1. 共有モデルディレクトリの作成
 # ------------------------------------------
-echo "[1/5] 共有モデルディレクトリを作成中..."
+echo "[1/6] 共有モデルディレクトリを作成中..."
 mkdir -p "$MODELS_DIR/checkpoints"
 mkdir -p "$MODELS_DIR/loras"
 mkdir -p "$MODELS_DIR/vae"
@@ -44,7 +44,7 @@ echo "  -> $MODELS_DIR に作成完了"
 # 2. Stable Diffusion WebUI
 # ------------------------------------------
 echo ""
-echo "[2/5] Stable Diffusion WebUI を確認中..."
+echo "[2/6] Stable Diffusion WebUI を確認中..."
 if [ -d "$SD_DIR" ]; then
     echo "  -> 既にインストール済み: $SD_DIR"
 else
@@ -129,10 +129,39 @@ else
 fi
 
 # ------------------------------------------
-# 3. ComfyUI のインストール
+# 3. SD WebUI 拡張機能のインストール
 # ------------------------------------------
 echo ""
-echo "[3/5] ComfyUI をインストール中..."
+echo "[3/6] SD WebUI 拡張機能をインストール中..."
+EXTENSIONS_DIR="$SD_DIR/extensions"
+mkdir -p "$EXTENSIONS_DIR"
+
+extensions=(
+    "Bing-su/adetailer"
+    "zixaphir/Stable-Diffusion-Webui-Civitai-Helper"
+    "adieyal/sd-dynamic-prompts"
+    "Mikubill/sd-webui-controlnet"
+    "AI-Creators-Society/stable-diffusion-webui-localization-ja_JP"
+    "AlUlkesh/stable-diffusion-webui-images-browser"
+    "picobyte/stable-diffusion-webui-wd14-tagger"
+    "blue-pen5805/sdweb-easy-prompt-selector"
+)
+
+for ext in "${extensions[@]}"; do
+    ext_name="${ext##*/}"
+    if [ -d "$EXTENSIONS_DIR/$ext_name" ]; then
+        echo "    $ext_name -> 既にインストール済み (スキップ)"
+    else
+        echo "    $ext_name -> インストール中..."
+        git clone "https://github.com/$ext" "$EXTENSIONS_DIR/$ext_name" --quiet
+    fi
+done
+
+# ------------------------------------------
+# 4. ComfyUI のインストール
+# ------------------------------------------
+echo ""
+echo "[4/6] ComfyUI をインストール中..."
 if [ -d "$COMFY_DIR" ]; then
     echo "  -> 既にインストール済み: $COMFY_DIR (スキップ)"
 else
@@ -168,7 +197,7 @@ done
 # 4. SD WebUI 用 data-dir の作成
 # ------------------------------------------
 echo ""
-echo "[4/5] SD WebUI の data-dir を作成中..."
+echo "[5/6] SD WebUI の data-dir を作成中..."
 mkdir -p "$SD_DATA_1"
 mkdir -p "$SD_DATA_2"
 echo "  -> $SD_DATA_1 (インスタンス1)"
@@ -178,7 +207,7 @@ echo "  -> $SD_DATA_2 (インスタンス2)"
 # 5. rclone のインストール
 # ------------------------------------------
 echo ""
-echo "[5/5] rclone をインストール中..."
+echo "[6/6] rclone をインストール中..."
 if command -v rclone &> /dev/null; then
     echo "  -> 既にインストール済み (スキップ)"
 else
