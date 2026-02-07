@@ -45,6 +45,22 @@ restore_rclone() {
 }
 
 # ------------------------------------------
+# ControlNet 依存パッケージの修復
+# ------------------------------------------
+fix_controlnet_deps() {
+    local aux_init="/usr/local/lib/python3.11/dist-packages/controlnet_aux/__init__.py"
+
+    # controlnet_aux が未インストール or パッチ未適用の場合のみ実行
+    if [ ! -f "$aux_init" ] || ! grep -q "mediapipe_face disabled" "$aux_init" 2>/dev/null; then
+        echo "[ControlNet] 依存パッケージを修復中..."
+        pip install controlnet_aux==0.0.10 -q 2>/dev/null
+        # mediapipe_face の非互換インポートを無効化 (mediapipe API変更による)
+        sed -i 's/from \.mediapipe_face import MediapipeFaceDetector/pass  # mediapipe_face disabled/' "$aux_init" 2>/dev/null
+        echo "[ControlNet] 修復完了"
+    fi
+}
+
+# ------------------------------------------
 # SD WebUI 起動関数
 # ------------------------------------------
 start_sd() {
@@ -251,6 +267,9 @@ rm -f "$LOG_DIR"/sd-*.log "$LOG_DIR"/comfy.log
 
 # rclone 復元
 restore_rclone
+
+# ControlNet 依存パッケージの修復
+fix_controlnet_deps
 
 # 起動
 if $LAUNCH_SD1; then
