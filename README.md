@@ -162,6 +162,48 @@ kill $(ps aux | grep -E "launch.py|main.py" | grep -v grep | awk '{print $2}')
 du -sh /notebooks/*
 ```
 
+## プロジェクト移行
+
+既存プロジェクトから新しいプロジェクトにモデルを移行する手順。
+
+### Step 1: 現プロジェクトでアップロード
+
+```bash
+bash /notebooks/paperspace-sd-setup/migrate-upload.sh
+```
+
+モデル・LoRA・ControlNet 等を自動検出して Google Drive (`SD_Migration/`) に退避します。
+
+### Step 2: 新プロジェクトをセットアップ
+
+```bash
+cd /notebooks
+git clone https://TOKEN@github.com/ichikawa8219/paperspace-sd-setup.git
+bash paperspace-sd-setup/setup.sh
+```
+
+### Step 3: rclone を設定
+
+```bash
+rclone config
+# -> "n" -> 名前: gdrive -> タイプ: drive -> ブラウザ認証
+cp ~/.config/rclone/rclone.conf /notebooks/rclone.conf
+```
+
+### Step 4: 新プロジェクトにダウンロード
+
+```bash
+bash /notebooks/paperspace-sd-setup/migrate-download.sh
+```
+
+Google Drive から `/notebooks/models/` にモデルを復元します。
+
+### Step 5: (任意) Google Drive の移行データを削除
+
+```bash
+rclone purge gdrive:SD_Migration/
+```
+
 ## 注意事項
 
 - `rclone.conf` には Google Drive の認証トークンが含まれます。**リポジトリにコミットしないでください**
