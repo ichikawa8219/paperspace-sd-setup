@@ -278,14 +278,14 @@ fi
 
 if $LAUNCH_SD2; then
     if $LAUNCH_SD1; then
-        # SD #1 のパッケージインストール完了を待機 (pip 競合回避)
-        echo "[SD WebUI #2] SD #1 のインストール完了を待機中..."
+        # SD #1 の share リンク確立まで待機 (pip 競合 + ネットワーク競合回避)
+        echo "[SD WebUI #2] SD #1 の起動完了を待機中..."
         waited=0
-        while [ $waited -lt 180 ]; do
+        while [ $waited -lt 300 ]; do
             sleep 5
             waited=$((waited + 5))
-            if grep -q "Loading weights\|Running on\|Startup time" "$LOG_DIR/sd-1.log" 2>/dev/null; then
-                echo "[SD WebUI #2] SD #1 準備完了、起動します"
+            if grep -q "gradio.live\|Could not create share link\|Startup time" "$LOG_DIR/sd-1.log" 2>/dev/null; then
+                echo "[SD WebUI #2] SD #1 起動完了、SD #2 を起動します"
                 break
             fi
         done
