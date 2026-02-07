@@ -200,6 +200,16 @@ echo ""
 echo "[5/6] SD WebUI の data-dir を作成中..."
 mkdir -p "$SD_DATA_1"
 mkdir -p "$SD_DATA_2"
+# data-dir から拡張機能を参照できるようにシンボリックリンクを作成
+for data_dir in "$SD_DATA_1" "$SD_DATA_2"; do
+    if [ -L "$data_dir/extensions" ]; then
+        echo "  -> $data_dir/extensions -> 既にリンク済み (スキップ)"
+    else
+        rm -rf "$data_dir/extensions"
+        ln -sf "$SD_DIR/extensions" "$data_dir/extensions"
+        echo "  -> $data_dir/extensions -> $SD_DIR/extensions"
+    fi
+done
 echo "  -> $SD_DATA_1 (インスタンス1)"
 echo "  -> $SD_DATA_2 (インスタンス2)"
 
