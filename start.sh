@@ -277,6 +277,19 @@ if $LAUNCH_SD1; then
 fi
 
 if $LAUNCH_SD2; then
+    if $LAUNCH_SD1; then
+        # SD #1 のパッケージインストール完了を待機 (pip 競合回避)
+        echo "[SD WebUI #2] SD #1 のインストール完了を待機中..."
+        local waited=0
+        while [ $waited -lt 180 ]; do
+            sleep 5
+            waited=$((waited + 5))
+            if grep -q "Loading weights\|Running on\|Startup time" "$LOG_DIR/sd-1.log" 2>/dev/null; then
+                echo "[SD WebUI #2] SD #1 準備完了、起動します"
+                break
+            fi
+        done
+    fi
     start_sd 2
 fi
 
