@@ -182,6 +182,11 @@ echo "[5/5] rclone をインストール中..."
 if command -v rclone &> /dev/null; then
     echo "  -> 既にインストール済み (スキップ)"
 else
+    # rclone のインストーラーに unzip が必要
+    if ! command -v unzip &> /dev/null; then
+        echo "  -> unzip をインストール中..."
+        apt-get update -qq && apt-get install -y -qq unzip > /dev/null 2>&1
+    fi
     curl -s https://rclone.org/install.sh | bash
     echo "  -> インストール完了"
 fi

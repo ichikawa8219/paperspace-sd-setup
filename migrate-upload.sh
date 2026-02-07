@@ -24,6 +24,9 @@ echo ""
 # ------------------------------------------
 if ! command -v rclone &> /dev/null; then
     echo "rclone がインストールされていません。インストールします..."
+    if ! command -v unzip &> /dev/null; then
+        apt-get update -qq && apt-get install -y -qq unzip > /dev/null 2>&1
+    fi
     curl -s https://rclone.org/install.sh | bash
 fi
 
