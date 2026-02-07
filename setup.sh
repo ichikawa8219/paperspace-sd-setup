@@ -144,7 +144,6 @@ extensions=(
     "AI-Creators-Society/stable-diffusion-webui-localization-ja_JP"
     "AlUlkesh/stable-diffusion-webui-images-browser"
     "picobyte/stable-diffusion-webui-wd14-tagger"
-    "blue-pen5805/sdweb-easy-prompt-selector"
 )
 
 for ext in "${extensions[@]}"; do
