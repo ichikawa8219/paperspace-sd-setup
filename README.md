@@ -162,6 +162,62 @@ kill $(ps aux | grep -E "launch.py|main.py" | grep -v grep | awk '{print $2}')
 du -sh /notebooks/*
 ```
 
+## モデルのダウンロード
+
+### 保存先一覧
+
+| モデル種類 | 保存先 |
+|-----------|--------|
+| Checkpoint | `/notebooks/models/checkpoints/` |
+| LoRA | `/notebooks/models/loras/` |
+| VAE | `/notebooks/models/vae/` |
+| ControlNet | `/notebooks/models/controlnet/` |
+| Embeddings | `/notebooks/models/embeddings/` |
+| Upscaler | `/notebooks/models/upscalers/` |
+| Diffusers | `/notebooks/models/diffusers/` |
+| CLIP | `/notebooks/models/clip/` |
+| UNet | `/notebooks/models/unet/` |
+
+### Hugging Face からダウンロード
+
+```bash
+# 単一ファイル (Checkpoint, LoRA, ControlNet 等)
+huggingface-cli download <リポジトリID> <ファイル名> --local-dir <保存先>
+
+# 例: Checkpoint をダウンロード
+huggingface-cli download author/model-name model.safetensors --local-dir /notebooks/models/checkpoints/
+
+# 例: ControlNet モデルをダウンロード
+huggingface-cli download author/controlnet-model diffusion_pytorch_model.safetensors --local-dir /notebooks/models/controlnet/
+
+# 例: Diffusers 形式 (ディレクトリごと)
+huggingface-cli download author/model-name --local-dir /notebooks/models/diffusers/model-name
+```
+
+### wget で直接ダウンロード
+
+```bash
+# Hugging Face の直接リンク
+wget -O /notebooks/models/checkpoints/model_name.safetensors \
+  "https://huggingface.co/author/model-name/resolve/main/model.safetensors"
+
+# CivitAI からダウンロード (モデルページの Download ボタンの URL)
+wget -O /notebooks/models/loras/lora_name.safetensors \
+  "https://civitai.com/api/download/models/XXXXX"
+```
+
+### ダウンロード後の確認
+
+```bash
+# 各ディレクトリの内容を確認
+ls -lh /notebooks/models/checkpoints/
+ls -lh /notebooks/models/loras/
+ls -lh /notebooks/models/controlnet/
+
+# ストレージ使用量
+du -sh /notebooks/models/*
+```
+
 ## プロジェクト移行
 
 既存プロジェクトから新しいプロジェクトにモデルを移行する手順。
