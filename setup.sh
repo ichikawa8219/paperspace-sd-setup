@@ -17,6 +17,7 @@ STORAGE="/storage"
 MODELS_DIR="$NOTEBOOKS/models"
 SD_DIR="$NOTEBOOKS/stable-diffusion-webui"
 COMFY_DIR="$NOTEBOOKS/ComfyUI"
+COMFY_VENV="$NOTEBOOKS/comfy-venv"
 SD_DATA_1="$NOTEBOOKS/sd-data-1"
 SD_DATA_2="$NOTEBOOKS/sd-data-2"
 
@@ -179,6 +180,18 @@ else
     git clone https://github.com/comfyanonymous/ComfyUI.git "$COMFY_DIR"
     echo "  -> インストール完了"
 fi
+
+# ComfyUI 用仮想環境の作成 (SD WebUI との依存パッケージ競合を回避)
+echo "  -> ComfyUI 用仮想環境を作成中..."
+if [ -d "$COMFY_VENV" ]; then
+    echo "    既に作成済み (スキップ)"
+else
+    python -m venv "$COMFY_VENV" --system-site-packages
+    echo "    作成完了: $COMFY_VENV"
+fi
+echo "  -> ComfyUI 依存パッケージをインストール中..."
+"$COMFY_VENV/bin/pip" install -r "$COMFY_DIR/requirements.txt" -q 2>/dev/null
+echo "  -> インストール完了"
 
 # ComfyUI のモデルディレクトリをシンボリックリンクに置換
 echo "  -> モデルのシンボリックリンクを設定中..."

@@ -20,6 +20,7 @@ NOTEBOOKS="/notebooks"
 MODELS_DIR="$NOTEBOOKS/models"
 SD_DIR="$NOTEBOOKS/stable-diffusion-webui"
 COMFY_DIR="$NOTEBOOKS/ComfyUI"
+COMFY_VENV="$NOTEBOOKS/comfy-venv"
 SD_DATA_1="$NOTEBOOKS/sd-data-1"
 SD_DATA_2="$NOTEBOOKS/sd-data-2"
 LOG_DIR="$NOTEBOOKS/logs"
@@ -101,17 +102,23 @@ start_sd() {
 }
 
 # ------------------------------------------
-# ComfyUI 依存パッケージのインストール
+# ComfyUI 仮想環境の準備
 # ------------------------------------------
 fix_comfy_deps() {
     if [ ! -d "$COMFY_DIR" ]; then
         return
     fi
 
+    # venv が未作成の場合は作成
+    if [ ! -d "$COMFY_VENV" ]; then
+        echo "[ComfyUI] 仮想環境を作成中..."
+        python -m venv "$COMFY_VENV" --system-site-packages
+    fi
+
     # alembic が未インストールの場合のみ実行
-    if ! python -c "import alembic" 2>/dev/null; then
+    if ! "$COMFY_VENV/bin/python" -c "import alembic" 2>/dev/null; then
         echo "[ComfyUI] 依存パッケージをインストール中..."
-        pip install -r "$COMFY_DIR/requirements.txt" -q 2>/dev/null
+        "$COMFY_VENV/bin/pip" install -r "$COMFY_DIR/requirements.txt" -q 2>/dev/null
         echo "[ComfyUI] インストール完了"
     fi
 }
@@ -122,9 +129,9 @@ fix_comfy_deps() {
 start_comfy() {
     local log_file="$LOG_DIR/comfy.log"
 
-    echo "[ComfyUI] 起動中... (port: $COMFY_PORT)"
+    echo "[ComfyUI] 起動中... (port: $COMFY_PORT, venv)"
     cd "$COMFY_DIR"
-    python main.py \
+    "$COMFY_VENV/bin/python" main.py \
         --listen 0.0.0.0 \
         --port "$COMFY_PORT" \
         > "$log_file" 2>&1 &
