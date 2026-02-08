@@ -198,6 +198,21 @@ echo "  -> ComfyUI 依存パッケージをインストール中..."
 "$COMFY_VENV/bin/pip" install -r "$COMFY_DIR/requirements.txt" -q 2>/dev/null
 echo "  -> インストール完了"
 
+# ComfyUI Manager のインストール
+echo "  -> ComfyUI Manager をインストール中..."
+COMFY_CUSTOM_NODES="$COMFY_DIR/custom_nodes"
+mkdir -p "$COMFY_CUSTOM_NODES"
+if [ -d "$COMFY_CUSTOM_NODES/ComfyUI-Manager" ]; then
+    echo "    既にインストール済み (スキップ)"
+else
+    git clone https://github.com/Comfy-Org/ComfyUI-Manager.git "$COMFY_CUSTOM_NODES/ComfyUI-Manager" --quiet
+    echo "    インストール完了"
+fi
+# ComfyUI Manager の依存パッケージをインストール
+if [ -f "$COMFY_CUSTOM_NODES/ComfyUI-Manager/requirements.txt" ]; then
+    "$COMFY_VENV/bin/pip" install -r "$COMFY_CUSTOM_NODES/ComfyUI-Manager/requirements.txt" -q 2>/dev/null
+fi
+
 # ComfyUI のモデルディレクトリをシンボリックリンクに置換
 echo "  -> モデルのシンボリックリンクを設定中..."
 for pair in \
