@@ -35,6 +35,18 @@ export PYTHONUNBUFFERED=1
 mkdir -p "$LOG_DIR"
 
 # ------------------------------------------
+# cloudflared のインストール (ComfyUI トンネル用)
+# ------------------------------------------
+install_cloudflared() {
+    if ! command -v cloudflared &>/dev/null; then
+        echo "[cloudflared] インストール中..."
+        wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O /usr/local/bin/cloudflared 2>/dev/null
+        chmod +x /usr/local/bin/cloudflared
+        echo "[cloudflared] インストール完了"
+    fi
+}
+
+# ------------------------------------------
 # rclone 設定の復元
 # ------------------------------------------
 restore_rclone() {
@@ -155,6 +167,13 @@ start_comfy() {
         > "$log_file" 2>&1 &
 
     echo "[ComfyUI] PID: $! | ログ: $log_file"
+
+    # cloudflared トンネルで外部アクセス用 URL を作成
+    if command -v cloudflared &>/dev/null; then
+        cloudflared tunnel --url "http://localhost:$COMFY_PORT" \
+            > "$LOG_DIR/comfy-tunnel.log" 2>&1 &
+        echo "[ComfyUI] トンネル起動中... (ログ: $LOG_DIR/comfy-tunnel.log)"
+    fi
 }
 
 # ------------------------------------------
@@ -198,7 +217,16 @@ wait_for_links() {
         if [ -f "$LOG_DIR/comfy.log" ]; then
             if ! echo "$found_links" | grep -q "comfy"; then
                 if grep -q "To see the GUI" "$LOG_DIR/comfy.log" 2>/dev/null; then
-                    echo "  comfy: http://localhost:$COMFY_PORT (ノートブック内からアクセス)"
+                    # cloudflared トンネル URL を検出
+                    local comfy_url=""
+                    if [ -f "$LOG_DIR/comfy-tunnel.log" ]; then
+                        comfy_url=$(grep -o "https://[a-z0-9-]*\.trycloudflare\.com" "$LOG_DIR/comfy-tunnel.log" 2>/dev/null | head -1)
+                    fi
+                    if [ -n "$comfy_url" ]; then
+                        echo "  comfy: $comfy_url"
+                    else
+                        echo "  comfy: http://localhost:$COMFY_PORT (トンネル未検出)"
+                    fi
                     found_links="$found_links comfy"
                 fi
             fi
@@ -307,7 +335,7 @@ fi
 sleep 2
 
 # 古いログを削除
-rm -f "$LOG_DIR"/sd-*.log "$LOG_DIR"/comfy.log
+rm -f "$LOG_DIR"/sd-*.log "$LOG_DIR"/comfy.log "$LOG_DIR"/comfy-tunnel.log
 
 # rclone 復元
 restore_rclone
@@ -315,9 +343,10 @@ restore_rclone
 # ControlNet 依存パッケージの修復
 fix_controlnet_deps
 
-# ComfyUI 依存パッケージのインストール
+# ComfyUI 依存パッケージのインストール + cloudflared
 if $LAUNCH_COMFY; then
     fix_comfy_deps
+    install_cloudflared
 fi
 
 # 起動

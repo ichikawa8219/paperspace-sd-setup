@@ -258,6 +258,19 @@ else
 fi
 
 # ------------------------------------------
+# 6. cloudflared のインストール (ComfyUI 外部アクセス用)
+# ------------------------------------------
+echo ""
+echo "[7/7] cloudflared をインストール中..."
+if command -v cloudflared &> /dev/null; then
+    echo "  -> 既にインストール済み (スキップ)"
+else
+    wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O /usr/local/bin/cloudflared
+    chmod +x /usr/local/bin/cloudflared
+    echo "  -> インストール完了"
+fi
+
+# ------------------------------------------
 # 完了
 # ------------------------------------------
 echo ""
