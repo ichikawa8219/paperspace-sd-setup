@@ -1,13 +1,16 @@
 #!/bin/bash
 
 # ============================================
-#  モデルダウンロードヘルパー
+#  モデルダウンロードヘルパー (ComfyUI 用)
 # ============================================
 # 使い方:
 #   bash download.sh <URL> <モデルタイプ>
 #
 # ComfyUI の「モデルが見つかりません」ダイアログで
 # 「URLをコピー」→ ターミナルで実行
+#
+# ダウンロード先: /tmp/models/<タイプ>/ (一時領域・セッション終了で消える)
+# ComfyUI は extra_model_paths.yaml で /tmp/models/ も検索するよう設定済み
 #
 # 例:
 #   bash download.sh "https://huggingface.co/.../vae.safetensors" vae
@@ -16,9 +19,9 @@
 #
 # モデルタイプ一覧:
 #   vae, lora, checkpoint, controlnet, embedding, upscaler,
-#   clip, unet, text_encoder, diffusion_model, diffusers
+#   clip, unet, text_encoder, diffusion_model
 
-MODELS_DIR="/notebooks/models"
+TMP_MODELS="/tmp/models"
 
 URL="$1"
 TYPE="$2"
@@ -26,47 +29,47 @@ TYPE="$2"
 if [ -z "$URL" ] || [ -z "$TYPE" ]; then
     echo "使い方: bash download.sh <URL> <モデルタイプ>"
     echo ""
+    echo "ダウンロード先: $TMP_MODELS/<タイプ>/ (一時領域)"
+    echo ""
     echo "モデルタイプ:"
-    echo "  vae              -> $MODELS_DIR/vae/"
-    echo "  lora             -> $MODELS_DIR/loras/"
-    echo "  checkpoint       -> $MODELS_DIR/checkpoints/"
-    echo "  controlnet       -> $MODELS_DIR/controlnet/"
-    echo "  embedding        -> $MODELS_DIR/embeddings/"
-    echo "  upscaler         -> $MODELS_DIR/upscalers/"
-    echo "  clip             -> $MODELS_DIR/clip/"
-    echo "  unet             -> $MODELS_DIR/unet/"
-    echo "  text_encoder     -> $MODELS_DIR/text_encoders/"
-    echo "  diffusion_model  -> $MODELS_DIR/diffusion_models/"
+    echo "  vae              -> $TMP_MODELS/vae/"
+    echo "  lora             -> $TMP_MODELS/loras/"
+    echo "  checkpoint       -> $TMP_MODELS/checkpoints/"
+    echo "  controlnet       -> $TMP_MODELS/controlnet/"
+    echo "  embedding        -> $TMP_MODELS/embeddings/"
+    echo "  upscaler         -> $TMP_MODELS/upscalers/"
+    echo "  clip             -> $TMP_MODELS/clip/"
+    echo "  unet             -> $TMP_MODELS/unet/"
+    echo "  text_encoder     -> $TMP_MODELS/text_encoders/"
+    echo "  diffusion_model  -> $TMP_MODELS/diffusion_models/"
     echo ""
     echo "例:"
     echo "  bash download.sh \"https://huggingface.co/.../model.safetensors\" vae"
     exit 1
 fi
 
-# モデルタイプ → ディレクトリのマッピング
+# モデルタイプ → サブディレクトリのマッピング
 case "$TYPE" in
     vae)
-        DIR="$MODELS_DIR/vae" ;;
+        SUBDIR="vae" ;;
     lora|loras)
-        DIR="$MODELS_DIR/loras" ;;
+        SUBDIR="loras" ;;
     checkpoint|checkpoints|ckpt)
-        DIR="$MODELS_DIR/checkpoints" ;;
+        SUBDIR="checkpoints" ;;
     controlnet)
-        DIR="$MODELS_DIR/controlnet" ;;
+        SUBDIR="controlnet" ;;
     embedding|embeddings)
-        DIR="$MODELS_DIR/embeddings" ;;
+        SUBDIR="embeddings" ;;
     upscaler|upscalers|upscale_models)
-        DIR="$MODELS_DIR/upscalers" ;;
+        SUBDIR="upscalers" ;;
     clip)
-        DIR="$MODELS_DIR/clip" ;;
+        SUBDIR="clip" ;;
     unet)
-        DIR="$MODELS_DIR/unet" ;;
+        SUBDIR="unet" ;;
     text_encoder|text_encoders)
-        DIR="$MODELS_DIR/text_encoders" ;;
+        SUBDIR="text_encoders" ;;
     diffusion_model|diffusion_models)
-        DIR="$MODELS_DIR/diffusion_models" ;;
-    diffusers)
-        DIR="$MODELS_DIR/diffusers" ;;
+        SUBDIR="diffusion_models" ;;
     *)
         echo "不明なモデルタイプ: $TYPE"
         echo "bash download.sh で使い方を確認してください"
@@ -74,6 +77,7 @@ case "$TYPE" in
         ;;
 esac
 
+DIR="$TMP_MODELS/$SUBDIR"
 mkdir -p "$DIR"
 
 # URL からファイル名を取得 (クエリパラメータを除去)
@@ -100,7 +104,7 @@ fi
 echo ""
 echo "ダウンロード:"
 echo "  URL:  $URL"
-echo "  保存: $OUTPUT"
+echo "  保存: $OUTPUT (一時領域)"
 echo ""
 
 wget --progress=bar:force -O "$OUTPUT" "$URL"

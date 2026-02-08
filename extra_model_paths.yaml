@@ -1,0 +1,16 @@
+# ComfyUI 追加モデル検索パス
+# /tmp/models/ (一時領域) のモデルも検索対象にする
+# download.sh でダウンロードしたモデルはここに保存される
+
+tmp_models:
+    base_path: /tmp/models/
+    checkpoints: checkpoints/
+    loras: loras/
+    vae: vae/
+    clip: clip/
+    unet: unet/
+    embeddings: embeddings/
+    controlnet: controlnet/
+    upscale_models: upscalers/
+    text_encoders: text_encoders/
+    diffusion_models: diffusion_models/

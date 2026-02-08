@@ -148,6 +148,13 @@ fix_comfy_deps() {
 # ------------------------------------------
 start_comfy() {
     local log_file="$LOG_DIR/comfy.log"
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+    # extra_model_paths.yaml を ComfyUI にコピー (/tmp/models/ を検索対象に追加)
+    if [ -f "$script_dir/extra_model_paths.yaml" ]; then
+        cp "$script_dir/extra_model_paths.yaml" "$COMFY_DIR/extra_model_paths.yaml"
+    fi
 
     # venv 内の NVIDIA ライブラリをシステムより優先 (CUDA バージョン競合回避)
     local nvidia_libs="$COMFY_VENV/lib/python3.11/site-packages/nvidia"
