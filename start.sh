@@ -295,13 +295,16 @@ fi
 # ------------------------------------------
 echo ""
 
-# 既存の SD WebUI / ComfyUI プロセスを停止
+# 既存の SD WebUI / ComfyUI プロセスを停止 (ポート解放を確実にする)
+echo "既存プロセスを停止中..."
+for port in $SD_PORT_1 $SD_PORT_2 $COMFY_PORT; do
+    fuser -k "$port/tcp" 2>/dev/null
+done
 existing_pids=$(ps aux | grep -E "launch\.py|main\.py" | grep -v grep | awk '{print $2}')
 if [ -n "$existing_pids" ]; then
-    echo "既存プロセスを停止中..."
     echo "$existing_pids" | xargs kill 2>/dev/null
-    sleep 2
 fi
+sleep 2
 
 # 古いログを削除
 rm -f "$LOG_DIR"/sd-*.log "$LOG_DIR"/comfy.log
