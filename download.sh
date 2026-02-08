@@ -4,75 +4,55 @@
 #  モデルダウンロードヘルパー (ComfyUI 用)
 # ============================================
 # 使い方:
-#   bash download.sh <URL> <モデルタイプ>
-#
-# ComfyUI の「モデルが見つかりません」ダイアログで
-# 「URLをコピー」→ ターミナルで実行
+#   bash download.sh
+#   → 対話形式で URL とモデルタイプを入力
 #
 # ダウンロード先: /tmp/models/<タイプ>/ (一時領域・セッション終了で消える)
 # ComfyUI は extra_model_paths.yaml で /tmp/models/ も検索するよう設定済み
-#
-# 例:
-#   bash download.sh "https://huggingface.co/.../vae.safetensors" vae
-#   bash download.sh "https://huggingface.co/.../model.safetensors" lora
-#   bash download.sh "https://huggingface.co/.../model.safetensors" diffusion_model
-#
-# モデルタイプ一覧:
-#   vae, lora, checkpoint, controlnet, embedding, upscaler,
-#   clip, unet, text_encoder, diffusion_model
 
 TMP_MODELS="/tmp/models"
 
-URL="$1"
-TYPE="$2"
+echo "========================================"
+echo "  モデルダウンロードヘルパー"
+echo "========================================"
+echo ""
 
-if [ -z "$URL" ] || [ -z "$TYPE" ]; then
-    echo "使い方: bash download.sh <URL> <モデルタイプ>"
-    echo ""
-    echo "ダウンロード先: $TMP_MODELS/<タイプ>/ (一時領域)"
-    echo ""
-    echo "モデルタイプ:"
-    echo "  vae              -> $TMP_MODELS/vae/"
-    echo "  lora             -> $TMP_MODELS/loras/"
-    echo "  checkpoint       -> $TMP_MODELS/checkpoints/"
-    echo "  controlnet       -> $TMP_MODELS/controlnet/"
-    echo "  embedding        -> $TMP_MODELS/embeddings/"
-    echo "  upscaler         -> $TMP_MODELS/upscalers/"
-    echo "  clip             -> $TMP_MODELS/clip/"
-    echo "  unet             -> $TMP_MODELS/unet/"
-    echo "  text_encoder     -> $TMP_MODELS/text_encoders/"
-    echo "  diffusion_model  -> $TMP_MODELS/diffusion_models/"
-    echo ""
-    echo "例:"
-    echo "  bash download.sh \"https://huggingface.co/.../model.safetensors\" vae"
+# Step 1: URL 入力
+read -r -p "ダウンロード URL: " URL
+
+if [ -z "$URL" ]; then
+    echo "URL が入力されていません"
     exit 1
 fi
 
-# モデルタイプ → サブディレクトリのマッピング
-case "$TYPE" in
-    vae)
-        SUBDIR="vae" ;;
-    lora|loras)
-        SUBDIR="loras" ;;
-    checkpoint|checkpoints|ckpt)
-        SUBDIR="checkpoints" ;;
-    controlnet)
-        SUBDIR="controlnet" ;;
-    embedding|embeddings)
-        SUBDIR="embeddings" ;;
-    upscaler|upscalers|upscale_models)
-        SUBDIR="upscalers" ;;
-    clip)
-        SUBDIR="clip" ;;
-    unet)
-        SUBDIR="unet" ;;
-    text_encoder|text_encoders)
-        SUBDIR="text_encoders" ;;
-    diffusion_model|diffusion_models)
-        SUBDIR="diffusion_models" ;;
+# Step 2: モデルタイプ選択
+echo ""
+echo "モデルタイプを選択してください:"
+echo ""
+echo "  1) vae"
+echo "  2) text_encoder"
+echo "  3) diffusion_model"
+echo "  4) lora"
+echo "  5) checkpoint"
+echo "  6) controlnet"
+echo "  7) clip"
+echo "  8) unet"
+echo "  9) embedding"
+echo ""
+read -r -p "選択 [1-9]: " choice
+
+case "$choice" in
+    1) SUBDIR="vae" ;;
+    2) SUBDIR="text_encoders" ;;
+    3) SUBDIR="diffusion_models" ;;
+    4) SUBDIR="loras" ;;
+    5) SUBDIR="checkpoints" ;;
+    6) SUBDIR="controlnet" ;;
+    7) SUBDIR="clip" ;;
+    8) SUBDIR="unet" ;;
+    9) SUBDIR="embeddings" ;;
     *)
-        echo "不明なモデルタイプ: $TYPE"
-        echo "bash download.sh で使い方を確認してください"
+        echo "無効な選択です"
         exit 1
         ;;
 esac
@@ -85,6 +65,7 @@ FILENAME=$(basename "$URL" | sed 's/[?#].*//')
 
 # ファイル名が空 or 拡張子なしの場合
 if [ -z "$FILENAME" ] || ! echo "$FILENAME" | grep -q "\."; then
+    echo ""
     echo "警告: ファイル名を URL から特定できません"
     read -r -p "ファイル名を入力: " FILENAME
 fi
@@ -93,6 +74,7 @@ OUTPUT="$DIR/$FILENAME"
 
 # 既にファイルが存在する場合
 if [ -f "$OUTPUT" ]; then
+    echo ""
     echo "既に存在: $OUTPUT"
     read -r -p "上書きしますか? [y/N]: " confirm
     if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
@@ -102,9 +84,10 @@ if [ -f "$OUTPUT" ]; then
 fi
 
 echo ""
-echo "ダウンロード:"
+echo "----------------------------------------"
 echo "  URL:  $URL"
-echo "  保存: $OUTPUT (一時領域)"
+echo "  保存: $OUTPUT"
+echo "----------------------------------------"
 echo ""
 
 wget --progress=bar:force -O "$OUTPUT" "$URL"
