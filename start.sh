@@ -137,8 +137,18 @@ fix_comfy_deps() {
 start_comfy() {
     local log_file="$LOG_DIR/comfy.log"
 
+    # venv 内の NVIDIA ライブラリをシステムより優先 (CUDA バージョン競合回避)
+    local nvidia_libs="$COMFY_VENV/lib/python3.11/site-packages/nvidia"
+    local comfy_ld_path=""
+    if [ -d "$nvidia_libs" ]; then
+        for lib_dir in "$nvidia_libs"/*/lib; do
+            [ -d "$lib_dir" ] && comfy_ld_path="$lib_dir:$comfy_ld_path"
+        done
+    fi
+
     echo "[ComfyUI] 起動中... (port: $COMFY_PORT, venv)"
     cd "$COMFY_DIR"
+    LD_LIBRARY_PATH="$comfy_ld_path${LD_LIBRARY_PATH:-}" \
     "$COMFY_VENV/bin/python" main.py \
         --listen 0.0.0.0 \
         --port "$COMFY_PORT" \
