@@ -39,6 +39,8 @@ mkdir -p "$MODELS_DIR/upscalers"
 mkdir -p "$MODELS_DIR/diffusers"
 mkdir -p "$MODELS_DIR/clip"
 mkdir -p "$MODELS_DIR/unet"
+mkdir -p "$MODELS_DIR/text_encoders"
+mkdir -p "$MODELS_DIR/diffusion_models"
 echo "  -> $MODELS_DIR に作成完了"
 
 # ------------------------------------------
@@ -207,7 +209,9 @@ for pair in \
     "upscale_models:upscalers" \
     "diffusers:diffusers" \
     "clip:clip" \
-    "unet:unet"; do
+    "unet:unet" \
+    "text_encoders:text_encoders" \
+    "diffusion_models:diffusion_models"; do
     comfy_name="${pair%%:*}"
     shared_name="${pair##*:}"
     target="$COMFY_DIR/models/$comfy_name"
