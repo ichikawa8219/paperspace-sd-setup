@@ -61,10 +61,12 @@ restore_rclone() {
 # システム依存パッケージの修復
 # ------------------------------------------
 fix_system_deps() {
-    # ml_dtypes が古いと jax/tensorflow が起動時にクラッシュする
-    if ! python -c "from ml_dtypes import float8_e3m4" 2>/dev/null; then
-        echo "[System] ml_dtypes を更新中..."
-        pip install "ml_dtypes>=0.4.0" -q 2>/dev/null
+    # tensorboard/ml_dtypes が古いと jax/tensorflow のインポート連鎖でクラッシュする
+    # tensorboard の notf モジュール破損 → tensorflow import → jax → ml_dtypes エラー
+    if ! python -c "from tensorboard.compat import notf" 2>/dev/null || \
+       ! python -c "from ml_dtypes import float8_e3m4" 2>/dev/null; then
+        echo "[System] tensorboard / ml_dtypes を更新中..."
+        pip install --upgrade tensorboard "ml_dtypes>=0.5.0" -q
         echo "[System] 更新完了"
     fi
 }
