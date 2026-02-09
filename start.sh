@@ -61,12 +61,15 @@ restore_rclone() {
 # システム依存パッケージの修復
 # ------------------------------------------
 fix_system_deps() {
-    # TensorFlow がインストールされていると起動時のインポートチェーンでクラッシュする
-    # (kornia → accelerate → tensorboard → tensorflow → jax → ml_dtypes の競合)
-    # SD WebUI に TensorFlow は不要なのでアンインストール
-    if python -c "import tensorflow" 2>/dev/null; then
-        echo "[System] 不要な TensorFlow を削除中 (起動クラッシュ防止)..."
-        pip uninstall tensorflow -y -q 2>/dev/null
+    # SD WebUI に不要なパッケージが起動時クラッシュを引き起こすため削除
+    # - tensorflow: kornia → accelerate → tensorboard → tensorflow → jax → ml_dtypes 競合
+    # - wandb: SD #1 起動時に protobuf がダウングレードされ、SD #2 で wandb_internal_pb2 が壊れる
+    local uninstall_pkgs=""
+    python -c "import tensorflow" 2>/dev/null && uninstall_pkgs="$uninstall_pkgs tensorflow"
+    python -c "import wandb" 2>/dev/null && uninstall_pkgs="$uninstall_pkgs wandb"
+    if [ -n "$uninstall_pkgs" ]; then
+        echo "[System] 不要パッケージを削除中:$uninstall_pkgs"
+        pip uninstall -y $uninstall_pkgs -q 2>/dev/null
         echo "[System] 削除完了"
     fi
 
