@@ -61,13 +61,21 @@ restore_rclone() {
 # システム依存パッケージの修復
 # ------------------------------------------
 fix_system_deps() {
-    # tensorflow 2.15.0 が ml_dtypes~=0.2.0 を要求し、jax と競合してクラッシュする
-    # SD WebUI は tensorflow を使わないのでアンインストールして競合を排除
+    # TensorFlow がインストールされていると起動時のインポートチェーンでクラッシュする
+    # (kornia → accelerate → tensorboard → tensorflow → jax → ml_dtypes の競合)
+    # SD WebUI に TensorFlow は不要なのでアンインストール
     if python -c "import tensorflow" 2>/dev/null; then
-        echo "[System] tensorflow を削除中 (SD WebUI 不要・依存競合の原因)..."
-        pip uninstall -y tensorflow -q 2>/dev/null
-        pip install --upgrade tensorboard "ml_dtypes>=0.5.0" -q 2>/dev/null
-        echo "[System] 完了"
+        echo "[System] 不要な TensorFlow を削除中 (起動クラッシュ防止)..."
+        pip uninstall tensorflow -y -q 2>/dev/null
+        echo "[System] 削除完了"
+    fi
+
+    # svglib (ControlNet 一部プリプロセッサ用) の依存ライブラリを修復
+    if ! python -c "import svglib" 2>/dev/null; then
+        echo "[System] svglib の依存パッケージをインストール中..."
+        apt-get install -y libcairo2-dev -qq 2>/dev/null
+        pip install svglib -q 2>/dev/null
+        echo "[System] svglib インストール完了"
     fi
 }
 
