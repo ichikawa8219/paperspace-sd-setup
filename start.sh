@@ -196,6 +196,7 @@ start_comfy() {
     "$COMFY_VENV/bin/python" main.py \
         --listen 0.0.0.0 \
         --port "$COMFY_PORT" \
+        --disable-smart-memory \
         > "$log_file" 2>&1 &
 
     echo "[ComfyUI] PID: $! | ログ: $log_file"
