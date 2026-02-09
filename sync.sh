@@ -55,9 +55,10 @@ show_status() {
 # ------------------------------------------
 check_rclone() {
     if ! command -v rclone &> /dev/null; then
-        echo "エラー: rclone がインストールされていません"
-        echo "  -> bash setup.sh を実行してください"
-        exit 1
+        echo "[rclone] インストール中..."
+        apt-get install -y unzip -qq 2>/dev/null
+        curl -s https://rclone.org/install.sh | bash
+        echo "[rclone] インストール完了"
     fi
 
     # rclone設定を復元
