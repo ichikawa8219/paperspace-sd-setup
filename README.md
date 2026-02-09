@@ -61,8 +61,29 @@ ls -la /notebooks/models/checkpoints/
 
 # 4. (任意) rclone で Google Drive を設定
 rclone config
-# -> "n" -> 名前: gdrive -> タイプ: drive -> ブラウザ認証
-# 設定を永続保存:
+# 以下の対話形式で設定:
+#
+# e/n/d/r/c/s/q> n                          ← 新しいリモートを作成
+# name> gdrive                              ← リモート名を入力
+# Storage> drive                            ← "drive" と入力 (Google Drive)
+# client_id>                                ← 空のまま Enter
+# client_secret>                            ← 空のまま Enter
+# scope> 1                                  ← "1" (Full access)
+# service_account_file>                     ← 空のまま Enter
+# Edit advanced config? (y/n)> n            ← "n"
+# Use auto config? (y/n)> n                 ← "n" (リモートサーバーなので)
+#
+# ここで認証用 URL が表示される:
+# 1. 表示された URL をローカル PC のブラウザで開く
+# 2. Google アカウントでログイン → rclone を許可
+# 3. 表示された認証コードをコピー
+# 4. ターミナルに貼り付けて Enter
+#
+# Configure this as a Shared Drive? (y/n)> n  ← "n"
+# y/e/d> y                                    ← "y" で確定
+# e/n/d/r/c/s/q> q                            ← "q" で終了
+
+# 設定を永続保存 (セッション再起動後も使えるようにする):
 cp ~/.config/rclone/rclone.conf /notebooks/rclone.conf
 ```
 
