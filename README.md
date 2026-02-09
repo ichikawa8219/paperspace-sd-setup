@@ -255,7 +255,7 @@ bash /notebooks/paperspace-sd-setup/migrate-upload.sh
 
 ```bash
 cd /notebooks
-git clone https://TOKEN@github.com/ichikawa8219/paperspace-sd-setup.git
+git clone https://github.com/ichikawa8219/paperspace-sd-setup.git
 bash paperspace-sd-setup/setup.sh
 ```
 

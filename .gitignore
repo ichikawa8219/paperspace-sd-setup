@@ -1,2 +1,4 @@
 rclone.conf
 *.log
+CLAUDE.md
+.DS_Store
