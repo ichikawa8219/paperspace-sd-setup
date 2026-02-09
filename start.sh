@@ -58,6 +58,18 @@ restore_rclone() {
 }
 
 # ------------------------------------------
+# システム依存パッケージの修復
+# ------------------------------------------
+fix_system_deps() {
+    # ml_dtypes が古いと jax/tensorflow が起動時にクラッシュする
+    if ! python -c "from ml_dtypes import float8_e3m4" 2>/dev/null; then
+        echo "[System] ml_dtypes を更新中..."
+        pip install "ml_dtypes>=0.4.0" -q 2>/dev/null
+        echo "[System] 更新完了"
+    fi
+}
+
+# ------------------------------------------
 # ControlNet 依存パッケージの修復
 # ------------------------------------------
 fix_controlnet_deps() {
@@ -346,6 +358,9 @@ rm -f "$LOG_DIR"/sd-*.log "$LOG_DIR"/comfy.log "$LOG_DIR"/comfy-tunnel.log
 
 # rclone 復元
 restore_rclone
+
+# システム依存パッケージの修復
+fix_system_deps
 
 # ControlNet 依存パッケージの修復
 fix_controlnet_deps
