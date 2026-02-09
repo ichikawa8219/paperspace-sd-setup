@@ -7,7 +7,7 @@
 # 使うために必要なモデルを一括ダウンロード
 #
 # ダウンロード先: /tmp/models/ (一時領域・セッション終了で消える)
-# 合計サイズ: 約 30GB
+# 合計サイズ: 約 20GB
 #
 # 使い方:
 #   bash workflows/qwen-multi-angle.sh
@@ -48,10 +48,10 @@ dl() {
 }
 
 # ------------------------------------------
-# 1. 拡散モデル (Diffusion Model) ~20GB
+# 1. 拡散モデル (Diffusion Model) ~10GB fp8mixed
 # ------------------------------------------
 echo "[1/5] 拡散モデル"
-dl "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_bf16.safetensors" \
+dl "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2511_fp8mixed.safetensors" \
     "$TMP_MODELS/diffusion_models"
 
 # ------------------------------------------
