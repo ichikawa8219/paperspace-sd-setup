@@ -210,6 +210,58 @@ start_comfy() {
 }
 
 # ------------------------------------------
+# タイムアウト後のバックグラウンド監視
+# ------------------------------------------
+_watch_remaining_links() {
+    local already_found="$1"
+    local waited=0
+    local max_extra=300
+
+    while [ $waited -lt $max_extra ]; do
+        sleep 5
+        waited=$((waited + 5))
+
+        local all_done=true
+
+        for log in "$LOG_DIR"/sd-*.log; do
+            [ -f "$log" ] || continue
+            local name
+            name=$(basename "$log" .log)
+            echo "$already_found" | grep -q "$name" && continue
+            if grep -q "gradio.live" "$log" 2>/dev/null; then
+                local link
+                link=$(grep -o "https://[a-z0-9]*.gradio.live" "$log" | head -1)
+                if [ -n "$link" ]; then
+                    echo "  [遅延検出] $name: $link"
+                    already_found="$already_found $name"
+                fi
+            else
+                all_done=false
+            fi
+        done
+
+        if [ -f "$LOG_DIR/comfy.log" ] && ! echo "$already_found" | grep -q "comfy"; then
+            if grep -q "To see the GUI" "$LOG_DIR/comfy.log" 2>/dev/null; then
+                local comfy_url=""
+                if [ -f "$LOG_DIR/comfy-tunnel.log" ]; then
+                    comfy_url=$(grep -o "https://[a-z0-9-]*\.trycloudflare\.com" "$LOG_DIR/comfy-tunnel.log" 2>/dev/null | head -1)
+                fi
+                if [ -n "$comfy_url" ]; then
+                    echo "  [遅延検出] comfy: $comfy_url"
+                else
+                    echo "  [遅延検出] comfy: http://localhost:$COMFY_PORT (トンネル未検出)"
+                fi
+                already_found="$already_found comfy"
+            else
+                all_done=false
+            fi
+        fi
+
+        $all_done && break
+    done
+}
+
+# ------------------------------------------
 # share リンクの取得・表示
 # ------------------------------------------
 wait_for_links() {
@@ -283,6 +335,25 @@ wait_for_links() {
     done
 
     echo "----------------------------------------"
+
+    # タイムアウトしても未検出のリンクがあればバックグラウンドで監視を継続
+    local missing_links=false
+    for log in "$LOG_DIR"/sd-*.log; do
+        [ -f "$log" ] || continue
+        local name
+        name=$(basename "$log" .log)
+        echo "$found_links" | grep -q "$name" || missing_links=true
+    done
+    if [ -f "$LOG_DIR/comfy.log" ] && ! echo "$found_links" | grep -q "comfy"; then
+        missing_links=true
+    fi
+
+    if $missing_links && [ $waited -ge $max_wait ]; then
+        echo ""
+        echo "※ 未検出のリンクはバックグラウンドで監視中 (最大追加5分)"
+        _watch_remaining_links "$found_links" &
+    fi
+
     echo ""
     echo "セッション終了前: bash sync.sh で画像をGDriveに転送"
     echo "ログ確認:         tail -f $LOG_DIR/sd-1.log"
