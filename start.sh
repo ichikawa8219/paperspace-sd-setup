@@ -61,13 +61,13 @@ restore_rclone() {
 # システム依存パッケージの修復
 # ------------------------------------------
 fix_system_deps() {
-    # tensorboard/ml_dtypes が古いと jax/tensorflow のインポート連鎖でクラッシュする
-    # tensorboard の notf モジュール破損 → tensorflow import → jax → ml_dtypes エラー
-    if ! python -c "from tensorboard.compat import notf" 2>/dev/null || \
-       ! python -c "from ml_dtypes import float8_e3m4" 2>/dev/null; then
-        echo "[System] tensorboard / ml_dtypes を更新中..."
-        pip install --upgrade tensorboard "ml_dtypes>=0.5.0" -q
-        echo "[System] 更新完了"
+    # tensorflow 2.15.0 が ml_dtypes~=0.2.0 を要求し、jax と競合してクラッシュする
+    # SD WebUI は tensorflow を使わないのでアンインストールして競合を排除
+    if python -c "import tensorflow" 2>/dev/null; then
+        echo "[System] tensorflow を削除中 (SD WebUI 不要・依存競合の原因)..."
+        pip uninstall -y tensorflow -q 2>/dev/null
+        pip install --upgrade tensorboard "ml_dtypes>=0.5.0" -q 2>/dev/null
+        echo "[System] 完了"
     fi
 }
 
