@@ -42,7 +42,7 @@ setup.sh (初回1回)
   → 拡張機能・rclone・cloudflared インストール
 
 start.sh (毎セッション)
-  → fix_system_deps: ml_dtypes 更新
+  → fix_system_deps: tensorflow/wandb 削除 + svglib 修復
   → fix_controlnet_deps: controlnet_aux パッチ (mediapipe_face 無効化)
   → fix_comfy_deps: venv + torch + requirements 確認
   → install_cloudflared: ComfyUI トンネル用
@@ -72,10 +72,12 @@ SD WebUI #1: 7860, SD WebUI #2: 7861, ComfyUI: 8188
 
 ## 既知の問題と対処パターン
 
-- **svglib インストール失敗** — `libcairo2-dev` が未インストール。ControlNet の一部プリプロセッサが使えないが非致命的。
+- **tensorflow/wandb クラッシュ** — Paperspace プリインストールの tensorflow/wandb が起動時インポートチェーンでクラッシュを起こす。fix_system_deps() で起動前に削除。
+- **svglib インストール失敗** — `libcairo2-dev` が未インストール。fix_system_deps() で apt-get + pip install で自動修復。
 - **protobuf バージョン競合** — SD WebUI は 3.20.0 を要求、mediapipe は >=4.25.3 を要求。ControlNet の mediapipe_face を sed で無効化して回避。
 - **gradio share リンク失敗** — ネットワーク競合時に発生。SD #2 の起動を SD #1 完了後まで遅延させて回避。
 - **bilingual_localization_helper エラー** — `--data-dir` のシンボリックリンクパスと `Path.relative_to()` の非互換。非致命的（日本語化は動作する）。
+- **rclone 消失** — `/usr/local/bin/` はセッションごとにリセット。sync.sh が未インストール時に自動インストールする。
 
 ## コード修正時の注意
 
