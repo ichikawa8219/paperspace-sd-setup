@@ -19,7 +19,26 @@ SD_DATA_2="$NOTEBOOKS/sd-data-2"
 COMFY_DIR="$NOTEBOOKS/ComfyUI"
 GDRIVE_REMOTE="gdrive"
 GDRIVE_BASE="SD_Backup"
-TODAY=$(date +%Y%m%d)
+TODAY=$(TZ='Asia/Tokyo' date +%Y%m%d)
+
+# ------------------------------------------
+# 転送先フォルダ名を決定（重複時はナンバリング）
+# ------------------------------------------
+resolve_dest_dir() {
+    local existing
+    existing=$(rclone lsd "$GDRIVE_REMOTE:$GDRIVE_BASE/" 2>/dev/null | awk '{print $NF}')
+
+    if echo "$existing" | grep -q "^${TODAY}$"; then
+        # 同日フォルダが既に存在 → ナンバリング
+        local num=2
+        while echo "$existing" | grep -q "^${TODAY}-${num}$"; do
+            num=$((num + 1))
+        done
+        echo "${TODAY}-${num}"
+    else
+        echo "${TODAY}"
+    fi
+}
 
 # ------------------------------------------
 # ストレージ使用量の表示
@@ -84,17 +103,23 @@ check_rclone() {
 sync_outputs() {
     local keep_local=$1
     local synced=0
+    local DEST_DIR
+    DEST_DIR=$(resolve_dest_dir)
 
     echo "========================================"
     echo "  Google Drive に画像を転送中..."
     echo "========================================"
-    echo "  転送先: $GDRIVE_REMOTE:$GDRIVE_BASE/$TODAY/"
+    echo "  日付(JST): $TODAY"
+    echo "  転送先: $GDRIVE_REMOTE:$GDRIVE_BASE/$DEST_DIR/"
+    if [ "$DEST_DIR" != "$TODAY" ]; then
+        echo "  ※ 同日フォルダが既に存在するため $DEST_DIR に保存します"
+    fi
     echo ""
 
     # SD WebUI インスタンス1の出力
     if [ -d "$SD_DATA_1/outputs" ] && [ "$(ls -A "$SD_DATA_1/outputs" 2>/dev/null)" ]; then
         echo "[SD #1] 転送中..."
-        rclone copy "$SD_DATA_1/outputs/" "$GDRIVE_REMOTE:$GDRIVE_BASE/$TODAY/sd-1/" -P
+        rclone copy "$SD_DATA_1/outputs/" "$GDRIVE_REMOTE:$GDRIVE_BASE/$DEST_DIR/sd-1/" -P
         synced=1
         if [ "$keep_local" != "true" ]; then
             find "$SD_DATA_1/outputs" -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.webp" \) -delete
@@ -107,7 +132,7 @@ sync_outputs() {
     # SD WebUI インスタンス2の出力
     if [ -d "$SD_DATA_2/outputs" ] && [ "$(ls -A "$SD_DATA_2/outputs" 2>/dev/null)" ]; then
         echo "[SD #2] 転送中..."
-        rclone copy "$SD_DATA_2/outputs/" "$GDRIVE_REMOTE:$GDRIVE_BASE/$TODAY/sd-2/" -P
+        rclone copy "$SD_DATA_2/outputs/" "$GDRIVE_REMOTE:$GDRIVE_BASE/$DEST_DIR/sd-2/" -P
         synced=1
         if [ "$keep_local" != "true" ]; then
             find "$SD_DATA_2/outputs" -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.webp" \) -delete
@@ -120,7 +145,7 @@ sync_outputs() {
     # ComfyUI の出力
     if [ -d "$COMFY_DIR/output" ] && [ "$(ls -A "$COMFY_DIR/output" 2>/dev/null)" ]; then
         echo "[ComfyUI] 転送中..."
-        rclone copy "$COMFY_DIR/output/" "$GDRIVE_REMOTE:$GDRIVE_BASE/$TODAY/comfyui/" -P
+        rclone copy "$COMFY_DIR/output/" "$GDRIVE_REMOTE:$GDRIVE_BASE/$DEST_DIR/comfyui/" -P
         synced=1
         if [ "$keep_local" != "true" ]; then
             find "$COMFY_DIR/output" -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.webp" \) -delete
@@ -132,7 +157,7 @@ sync_outputs() {
 
     echo ""
     if [ $synced -eq 1 ]; then
-        echo "転送完了! Google Drive: $GDRIVE_REMOTE:$GDRIVE_BASE/$TODAY/"
+        echo "転送完了! Google Drive: $GDRIVE_REMOTE:$GDRIVE_BASE/$DEST_DIR/"
     else
         echo "転送する画像がありませんでした"
     fi
