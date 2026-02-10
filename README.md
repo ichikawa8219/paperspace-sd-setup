@@ -2,6 +2,16 @@
 
 Paperspace Gradient で Stable Diffusion WebUI / ComfyUI を効率的に運用するためのスクリプト集。
 
+## クイックスタート
+
+```bash
+# 起動 (メニューから選択)
+bash /notebooks/paperspace-sd-setup/start.sh
+
+# セッション終了前に実行 (画像をGDriveに転送 & ローカル削除)
+bash /notebooks/paperspace-sd-setup/sync.sh
+```
+
 ## 特徴
 
 - **SD WebUI + ComfyUI の同時起動** (A6000 48GB VRAM で余裕)
