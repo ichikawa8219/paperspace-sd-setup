@@ -8,6 +8,9 @@ Paperspace Gradient で Stable Diffusion WebUI / ComfyUI を効率的に運用�
 # 起動 (メニューから選択)
 bash /notebooks/paperspace-sd-setup/start.sh
 
+# 別ターミナルで実行 (非アクティブによる自動シャットダウンを防止)
+bash /notebooks/paperspace-sd-setup/keepalive.sh
+
 # セッション終了前に実行 (画像をGDriveに転送 & ローカル削除)
 bash /notebooks/paperspace-sd-setup/sync.sh
 ```
@@ -179,6 +182,9 @@ bash /notebooks/paperspace-sd-setup/sync.sh --status
 ## よく使うコマンド
 
 ```bash
+# キープアライブ (別ターミナルで実行、非アクティブシャットダウン防止)
+bash /notebooks/paperspace-sd-setup/keepalive.sh
+
 # ログ確認
 tail -f /notebooks/logs/sd-1.log
 tail -f /notebooks/logs/comfy.log
