@@ -166,6 +166,14 @@ fix_comfy_deps() {
         "$COMFY_VENV/bin/pip" install -r "$COMFY_DIR/requirements.txt" -q 2>/dev/null
         echo "[ComfyUI] インストール完了"
     fi
+
+    # ComfyUI Manager の依存パッケージをインストール (gitpython 等)
+    local manager_req="$COMFY_DIR/custom_nodes/ComfyUI-Manager/requirements.txt"
+    if [ -f "$manager_req" ] && ! "$COMFY_VENV/bin/python" -c "import git" 2>/dev/null; then
+        echo "[ComfyUI Manager] 依存パッケージをインストール中..."
+        "$COMFY_VENV/bin/pip" install -r "$manager_req" -q 2>/dev/null
+        echo "[ComfyUI Manager] インストール完了"
+    fi
 }
 
 # ------------------------------------------
